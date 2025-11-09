@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Вхід{% endblock %}
+{% block content %}
+
+<!-- Форма авторизації користувача -->
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5">
+    <div class="card border-0 shadow-sm p-4">
+      <h3 class="text-center mb-4 text-light">Вхід до системи</h3>
+
+      <form method="POST" action="{{ url_for('login') }}">
+        <!-- Поле логіна -->
+        <div class="mb-3">
+          <label class="form-label text-light">Логін</label>
+          <input type="text" name="username" class="form-control" placeholder="Введіть логін" required>
+        </div>
+
+        <!-- Поле пароля -->
+        <div class="mb-3">
+          <label class="form-label text-light">Пароль</label>
+          <input type="password" name="password" class="form-control" placeholder="Введіть пароль" required>
+        </div>
+
+        <!-- Кнопка входу -->
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary">Увійти</button>
+        </div>
+      </form>
+
+      <!-- Форма реєстрації нового користувача -->
+      <hr class="text-secondary my-4">
+      <h5 class="text-light mb-3">Реєстрація нового користувача</h5>
+
+      <form method="POST" action="{{ url_for('register') }}">
+        <!-- Ім’я -->
+        <div class="mb-3">
+          <label class="form-label text-light">Ім’я</label>
+          <input type="text" name="name" class="form-control" placeholder="Ваше ім’я">
+        </div>
+
+        <!-- Логін -->
+        <div class="mb-3">
+          <label class="form-label text-light">Логін</label>
+          <input type="text" name="username" class="form-control" placeholder="Створіть логін" required>
+        </div>
+
+        <!-- Пароль -->
+        <div class="mb-3">
+          <label class="form-label text-light">Пароль</label>
+          <input type="password" name="password" class="form-control" placeholder="Створіть пароль" required>
+        </div>
+
+        <!-- Валюта користувача -->
+        <div class="mb-3">
+          <label class="form-label text-light">Валюта</label>
+          <select name="currency" class="form-select">
+            <option value="UAH">UAH (₴)</option>
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+          </select>
+        </div>
+
+        <!-- Кнопка реєстрації -->
+        <div class="d-grid">
+          <button type="submit" class="btn btn-outline-light">Зареєструватися</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

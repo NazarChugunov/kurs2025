@@ -1,0 +1,97 @@
+/* Основний фон сторінки */
+body {
+    background-color: #181a1b;
+    color: #fff;
+    font-family: "Segoe UI", sans-serif;
+    min-height: 100vh;
+}
+
+/* Верхнє меню (navbar) */
+.navbar {
+    background-color: #111315 !important;
+}
+.nav-link {
+    color: #d1d1d1 !important;
+    font-weight: 500;
+    transition: 0.2s;
+}
+.nav-link.active,
+.nav-link:hover {
+    color: #ffffff !important;
+}
+
+/* Карточки (контейнери з даними) */
+.card {
+    background-color: #222426 !important;
+    border: none;
+    border-radius: 12px;
+}
+
+/* Основні кнопки */
+.btn-primary {
+    background-color: #0d6efd !important;
+    border: none !important;
+    border-radius: 10px;
+}
+.btn-primary:hover {
+    background-color: #0b5ed7 !important;
+}
+
+/* Поля вводу та списки (перезапис Bootstrap-стилів) */
+body .form-control,
+body .form-select,
+body input.form-control,
+body select.form-select {
+    background-color: #1f2226 !important;
+    color: #ffffff !important;
+    border: 1px solid #b8b8b8 !important;
+    border-radius: 10px !important;
+    min-height: 42px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Спеціальні типи полів (date, number, text) */
+body input[type="date"].form-control,
+body input[type="number"].form-control,
+body input[type="text"].form-control {
+    background-color: #1f2226 !important;
+    color: #ffffff !important;
+}
+
+/* Ефект фокусу для полів вводу */
+body .form-control:focus,
+body .form-select:focus {
+    background-color: #262a30 !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.25);
+    color: #fff !important;
+}
+
+/* Колір тексту підказок (placeholder) */
+body .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Темна тема для календаря */
+input[type="date"].form-control {
+    color-scheme: dark;
+}
+
+/* Таблиці */
+.table {
+    color: #fff;
+}
+.table-dark th,
+.table-dark td {
+    background-color: transparent;
+    border-color: #3a3a3a;
+}
+
+/* Прогрес-бари */
+.progress {
+    background-color: #2f3336;
+    border-radius: 999px;
+}
+.progress-bar {
+    border-radius: 999px;
+}

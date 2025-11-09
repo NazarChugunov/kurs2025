@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Панель{% endblock %}
+{% block content %}
+
+<h3 class="mb-3 text-light">Огляд за місяць</h3>
+<p class="text-secondary">Період: {{ month }}</p>
+
+<!-- Вибір місяця і року -->
+<form method="get" action="{{ url_for('dashboard') }}" class="row g-2 mb-4">
+  <div class="col-md-4">
+    <label class="form-label text-light">Виберіть період</label>
+    <div class="d-flex gap-2">
+      {# місяць #}
+      <select name="month" class="form-select bg-dark text-light">
+        {% for m_num, m_name in months %}
+          <option value="{{ m_num }}" {% if m_num == selected_month %}selected{% endif %}>
+            {{ m_name|capitalize }}
+          </option>
+        {% endfor %}
+      </select>
+      {# рік #}
+      <select name="year" class="form-select bg-dark text-light">
+        {% for y in years %}
+          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="col-md-2 d-flex align-items-end">
+    <button class="btn btn-primary w-100" type="submit">Показати</button>
+  </div>
+</form>
+
+<!-- Ключові показники -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card bg-dark border-0 p-3 shadow-sm h-100">
+      <div class="text-white fw-semibold">Дохід</div>
+      <div class="fs-4 mt-2 text-white">{{ currency }} {{ "%.2f"|format(income) }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-dark border-0 p-3 shadow-sm h-100">
+      <div class="text-white fw-semibold">Витрати</div>
+      <div class="fs-4 mt-2 text-white">{{ currency }} {{ "%.2f"|format(expenses) }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-dark border-0 p-3 shadow-sm h-100">
+      <div class="text-white fw-semibold">Накопичено в цілях</div>
+      <div class="fs-4 mt-2 text-white">{{ currency }} {{ "%.2f"|format(goals_savings) }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-dark border-0 p-3 shadow-sm h-100">
+      <div class="text-white fw-semibold">Баланс за період</div>
+      <div class="fs-4 mt-2 text-white">{{ currency }} {{ "%.2f"|format(balance) }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Фінансове здоров’я -->
+<div class="mb-4">
+  <div class="d-flex align-items-center gap-2 mb-2">
+    <h6 class="text-light mb-0">Фінансове здоров’я</h6>
+    <!-- підказка про формулу -->
+    <span
+      class="text-secondary"
+      style="cursor: pointer;"
+      data-bs-toggle="tooltip"
+      data-bs-placement="right"
+      title="50% — витрати, 30% — бюджет, 20% — цілі."
+    >
+      ⓘ
+    </span>
+  </div>
+  <div class="progress mb-2" style="height: 22px;">
+    <div
+      class="progress-bar {% if health >= 70 %}bg-success{% elif health >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
+      role="progressbar"
+      style="width: {{ health }}%;"
+      aria-valuenow="{{ health }}"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      {{ "%.1f"|format(health) }}%
+    </div>
+  </div>
+</div>
+
+<!-- Діаграми -->
+<div class="row g-4">
+  <!-- витрати по категоріях -->
+  <div class="col-md-6">
+    <div class="card bg-dark border-0 p-3 shadow-sm h-100">
+      <h6 class="text-light mb-3">Структура витрат за категоріями</h6>
+      <canvas id="expenseChart" height="220"></canvas>
+      {% if not exp_labels %}
+        <p class="text-muted mt-2">Немає витрат у цьому періоді.</p>
+      {% endif %}
+    </div>
+  </div>
+  <!-- рух коштів по днях -->
+  <div class="col-md-6">
+    <div class="card bg-dark border-0 p-3 shadow-sm h-100">
+      <h6 class="text-light mb-3">Рух коштів за днями</h6>
+      <canvas id="dailyChart" height="220"></canvas>
+      {% if not daily_labels %}
+        <p class="text-muted mt-2">Немає транзакцій у цьому періоді.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // дані з бекенда
+  const expLabels = {{ exp_labels|tojson }};
+  const expValues = {{ exp_values|tojson }};
+  const dailyLabelsRaw = {{ daily_labels|tojson }};
+  const dailyValues = {{ daily_values|tojson }};
+
+  // YYYY-MM-DD -> "8 листопада"
+  function formatDateUkr(isoDate) {
+    const months = [
+      "січня","лютого","березня","квітня","травня","червня",
+      "липня","серпня","вересня","жовтня","листопада","грудня"
+    ];
+    const parts = isoDate.split("-");
+    if (parts.length !== 3) return isoDate;
+    const m = parseInt(parts[1], 10);
+    const d = parseInt(parts[2], 10);
+    if (isNaN(m) || isNaN(d)) return isoDate;
+    return `${d} ${months[m - 1]}`;
+  }
+
+  // перетворюємо дати для підписів
+  const dailyLabels = dailyLabelsRaw.map(formatDateUkr);
+
+  // базові кольори
+  const brightColors = [
+    '#00bcd4', '#4caf50', '#ff9800',
+    '#e91e63', '#9c27b0', '#ffcd56'
+  ];
+
+  // 🟡 донат по витратах
+  if (expLabels.length > 0) {
+    const ctx1 = document.getElementById('expenseChart').getContext('2d');
+    new Chart(ctx1, {
+      type: 'doughnut',
+      data: {
+        labels: expLabels,
+        datasets: [{
+          data: expValues,
+          backgroundColor: brightColors,
+          borderColor: '#181a1b',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            labels: { color: '#fff' }
+          }
+        }
+      }
+    });
+  }
+
+  // 🔵 лінія по днях
+  if (dailyLabels.length > 0) {
+    const ctx2 = document.getElementById('dailyChart').getContext('2d');
+    new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: dailyLabels,
+        datasets: [{
+          label: 'Рух коштів за днями',
+          data: dailyValues,
+          borderColor: '#36a2eb',
+          backgroundColor: 'rgba(54,162,235,0.2)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          pointBackgroundColor: '#36a2eb'
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            ticks: { color: '#fff' },
+            grid: { color: 'rgba(255,255,255,0.03)' }
+          },
+          y: {
+            ticks: { color: '#fff' },
+            grid: { color: 'rgba(255,255,255,0.03)' }
+          }
+        },
+        plugins: {
+          legend: { labels: { color: '#fff' } }
+        }
+      }
+    });
+  }
+
+  // активація tooltip'ів Bootstrap
+  document.addEventListener('DOMContentLoaded', function () {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltipTriggerList.map(function (el) {
+      return new bootstrap.Tooltip(el)
+    })
+  });
+</script>
+
+{% endblock %}

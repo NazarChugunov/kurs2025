@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Цілі{% endblock %}
+{% block content %}
+
+<!-- Заголовок сторінки -->
+<h3 class="mb-3 text-light">Фінансові цілі</h3>
+
+<!-- Форма для додавання нової цілі -->
+<div class="card mb-4 p-3 border-0 shadow-sm">
+  <h6 class="text-light mb-3">Додати нову ціль</h6>
+  <form method="post" action="{{ url_for('add_savings') }}" class="row g-2">
+    <div class="col-md-4">
+      <label class="form-label text-light">Назва цілі</label>
+      <input name="name" class="form-control" placeholder="Напр. Відпустка" required>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label text-light">Цільова сума</label>
+      <input name="target" type="number" step="0.01" min="0" class="form-control" placeholder="0.00" required>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label text-light">Вже є</label>
+      <input name="current" type="number" step="0.01" min="0" value="0" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label text-light">Дедлайн</label>
+      <input name="deadline" type="date" class="form-control">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+      <button class="btn btn-primary w-100" type="submit">Зберегти</button>
+    </div>
+  </form>
+</div>
+
+<!-- Таблиця з усіма фінансовими цілями -->
+<div class="card border-0 shadow-sm p-3">
+  <h5 class="text-light mb-3">Мої цілі</h5>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Назва</th>
+          <th>План</th>
+          <th style="width: 35%;">Прогрес</th>
+          <th>Дедлайн</th>
+          <th class="text-end" style="width: 160px;">Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Якщо цілі існують -->
+        {% if goals %}
+          {% for gid, g, percent in goals %}
+          <tr>
+            <td>{{ g.name }}</td>
+            <td>
+              {{ currency }} {{ "%.2f"|format(g.current|float) }} /
+              {{ currency }} {{ "%.2f"|format(g.target|float) }}
+            </td>
+            <td>
+              <!-- Прогрес виконання -->
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress w-100" style="height: 14px;">
+                  <div
+                    class="progress-bar {% if percent >= 100 %}bg-success{% else %}bg-info{% endif %}"
+                    style="width: {{ "%.0f"|format(percent) }}%;"
+                  ></div>
+                </div>
+                <span class="small text-light">{{ "%.0f"|format(percent) }}%</span>
+              </div>
+            </td>
+            <td>{{ g.deadline or '-' }}</td>
+
+            <!-- Кнопки дій (редагувати / видалити) -->
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  class="btn btn-sm btn-outline-light"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#edit{{ gid }}"
+                >
+                  Редагувати
+                </button>
+                <form
+                  method="post"
+                  action="{{ url_for('delete_goal', gid=gid) }}"
+                  onsubmit="return confirm('Видалити ціль?');"
+                >
+                  <button class="btn btn-sm btn-outline-danger" type="submit">×</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Прихована форма для редагування -->
+          <tr class="collapse" id="edit{{ gid }}">
+            <td colspan="5">
+              <form method="post" action="{{ url_for('update_goal', gid=gid) }}" class="row g-2 mt-2">
+                <div class="col-md-4">
+                  <label class="form-label text-light">Назва цілі</label>
+                  <input
+                    type="text"
+                    name="name"
+                    class="form-control"
+                    value="{{ g.name }}"
+                    required
+                  >
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label text-light">Цільова сума</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    name="target"
+                    class="form-control"
+                    value="{{ "%.2f"|format(g.target|float) }}"
+                    required
+                  >
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label text-light">Вже є</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    name="current"
+                    class="form-control"
+                    value="{{ "%.2f"|format(g.current|float) }}"
+                    required
+                  >
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label text-light">Дедлайн</label>
+                  <input
+                    type="date"
+                    name="deadline"
+                    class="form-control"
+                    value="{{ g.deadline }}"
+                  >
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                  <button type="submit" class="btn btn-primary w-100">Оновити</button>
+                </div>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+
+        <!-- Якщо цілей ще немає -->
+        {% else %}
+          <tr>
+            <td colspan="5" class="text-light py-3">Цілей ще немає.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
