@@ -2,68 +2,85 @@
 {% block title %}Вхід{% endblock %}
 {% block content %}
 
-<!-- Форма авторизації користувача -->
-<div class="row justify-content-center mt-5">
-  <div class="col-md-5">
-    <div class="card border-0 shadow-sm p-4">
-      <h3 class="text-center mb-4 text-light">Вхід до системи</h3>
+<style>
+  .auth-card {
+    max-width: 430px;
+    margin: 40px auto;
+    background: #1f2124;
+    border-radius: 18px;
+  }
 
-      <form method="POST" action="{{ url_for('login') }}">
-        <!-- Поле логіна -->
+  /* робимо темні вкладки */
+  .auth-tabs {
+    border-bottom: 1px solid #3a3a3a;
+  }
+  .auth-tabs .nav-link {
+    background: transparent !important;
+    color: #bfc3c7 !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    border-radius: 0 !important;
+  }
+  .auth-tabs .nav-link.active {
+    color: #fff !important;
+    border-bottom: 3px solid #0d6efd !important;
+    background: transparent !important;
+  }
+</style>
+
+<div class="card auth-card shadow-sm p-4">
+  <ul class="nav nav-tabs auth-tabs mb-4" id="authTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-pane" type="button" role="tab">
+        Вхід
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register-pane" type="button" role="tab">
+        Реєстрація
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="authTabsContent">
+    <!-- вхід -->
+    <div class="tab-pane fade show active" id="login-pane" role="tabpanel">
+      <h4 class="text-light mb-3 text-center">Вхід до системи</h4>
+      <form method="post" action="{{ url_for('login') }}">
         <div class="mb-3">
           <label class="form-label text-light">Логін</label>
-          <input type="text" name="username" class="form-control" placeholder="Введіть логін" required>
+          <input type="text" name="username" class="form-control" required>
         </div>
-
-        <!-- Поле пароля -->
         <div class="mb-3">
           <label class="form-label text-light">Пароль</label>
-          <input type="password" name="password" class="form-control" placeholder="Введіть пароль" required>
+          <input type="password" name="password" class="form-control" required>
         </div>
-
-        <!-- Кнопка входу -->
-        <div class="d-grid">
-          <button type="submit" class="btn btn-primary">Увійти</button>
-        </div>
+        <button type="submit" class="btn btn-primary w-100 mt-2">Увійти</button>
       </form>
+    </div>
 
-      <!-- Форма реєстрації нового користувача -->
-      <hr class="text-secondary my-4">
-      <h5 class="text-light mb-3">Реєстрація нового користувача</h5>
-
-      <form method="POST" action="{{ url_for('register') }}">
-        <!-- Ім’я -->
-        <div class="mb-3">
-          <label class="form-label text-light">Ім’я</label>
-          <input type="text" name="name" class="form-control" placeholder="Ваше ім’я">
-        </div>
-
-        <!-- Логін -->
+    <!-- реєстрація -->
+    <div class="tab-pane fade" id="register-pane" role="tabpanel">
+      <h4 class="text-light mb-3 text-center">Реєстрація</h4>
+      <form method="post" action="{{ url_for('register') }}">
         <div class="mb-3">
           <label class="form-label text-light">Логін</label>
-          <input type="text" name="username" class="form-control" placeholder="Створіть логін" required>
+          <input type="text" name="username" class="form-control" required>
         </div>
-
-        <!-- Пароль -->
         <div class="mb-3">
           <label class="form-label text-light">Пароль</label>
-          <input type="password" name="password" class="form-control" placeholder="Створіть пароль" required>
+          <input type="password" name="password" class="form-control" required>
         </div>
-
-        <!-- Валюта користувача -->
         <div class="mb-3">
           <label class="form-label text-light">Валюта</label>
-          <select name="currency" class="form-select">
+          <select name="currency" class="form-select" required>
             <option value="UAH">UAH (₴)</option>
             <option value="USD">USD ($)</option>
             <option value="EUR">EUR (€)</option>
           </select>
         </div>
-
-        <!-- Кнопка реєстрації -->
-        <div class="d-grid">
-          <button type="submit" class="btn btn-outline-light">Зареєструватися</button>
-        </div>
+        <!-- робимо кнопку такою ж, як у вході -->
+        <button type="submit" class="btn btn-primary w-100 mt-2">Зареєструватися</button>
       </form>
     </div>
   </div>
